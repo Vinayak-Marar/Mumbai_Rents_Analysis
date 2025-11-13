@@ -3,4 +3,6 @@ pandas
 scikit-learn
 mlflow
 fastapi
+python-multipart
+uvicorn
 -e .
