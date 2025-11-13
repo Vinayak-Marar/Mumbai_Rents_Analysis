@@ -3,6 +3,11 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+data/
+mlruns/
+experiment/full_df.csv
+experiment/final_df.csv
+
 # C extensions
 *.so
 
