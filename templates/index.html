@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mumbai Rent Price Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: 'Poppins', sans-serif;
+            color: #f5f5f5;
+        }
+
+        /* Background image covering entire site */
+        body {
+            background: url('images/mumbai_skyline.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Dark semi-transparent navbar */
+        nav {
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav a {
+            color: #f5f5f5;
+            text-decoration: none;
+            margin: 0 20px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: #00ffcc;
+        }
+
+        /* Center content */
+        .hero {
+            text-align: center;
+            margin-top: 25vh;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            color: #00ffcc;
+            text-shadow: 2px 2px 10px #000;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #f0f0f0;
+            max-width: 600px;
+            margin: 20px auto;
+            text-shadow: 1px 1px 5px #000;
+        }
+
+        footer {
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 0;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <a href="prediction.html">Prediction</a>
+        <a href="recommendation.html">Recommendation</a>
+        <a href="visualization.html">Visualization</a>
+        <a href="interpretation.html">Interpretation</a>
+    </nav>
+
+    <!-- Main Section -->
+    <div class="hero">
+        <h1>Mumbai Housing Rent Price Analysis</h1>
+        <p>Explore insights, predict prices, and discover the best rental recommendations across Mumbai.</p>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        © 2025 Mumbai Rent Prediction Project
+    </footer>
+</body>
+</html>

@@ -8,7 +8,7 @@ mlruns/
 experiment/full_df.csv
 experiment/final_df.csv
 src.egg-info
-
+models/
 # C extensions
 *.so
 

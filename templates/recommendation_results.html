@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommended Properties</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0d1117;
+            color: #f0f6fc;
+            margin: 0;
+            padding: 0;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 500px;
+            margin: 30px auto;
+        }
+
+        .properties {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .card {
+            background: #161b22;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.05);
+        }
+
+        .card h3 {
+            margin: 0;
+            color: #58a6ff;
+        }
+
+        .card p {
+            font-size: 0.9em;
+            color: #8b949e;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="text-align:center; color:#58a6ff; padding-top:20px;">Top 5 Recommendations</h2>
+
+    <div id="map" class="map-container"></div>
+
+    <div class="properties">
+        {% for prop in properties %}
+        <div class="card">
+            <h3>{{ prop.name }}</h3>
+            <p><strong>Rent:</strong> ₹{{ prop.rent }}</p>
+            <p><strong>Location:</strong> {{ prop.location }}</p>
+            <p><strong>Rooms:</strong> {{ prop.rooms }}</p>
+            <p><strong>Area:</strong> {{ prop.area }} sqft</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        const data = [{
+            type: 'scattermapbox',
+            mode: 'markers',
+            lon: {{ lons | safe }},
+            lat: {{ lats | safe }},
+            text: {{ names | safe }},
+            marker: { size: 12, color: '#58a6ff' }
+        }];
+
+        const layout = {
+            dragmode: 'zoom',
+            mapbox: {
+                style: 'dark',
+                center: { lon: 72.8777, lat: 19.0760 },
+                zoom: 9
+            },
+            margin: {r:0, t:0, b:0, l:0},
+            paper_bgcolor: '#0d1117',
+            plot_bgcolor: '#0d1117'
+        };
+
+        Plotly.newPlot('map', data, layout, {displayModeBar: false});
+    </script>
+</body>
+</html>

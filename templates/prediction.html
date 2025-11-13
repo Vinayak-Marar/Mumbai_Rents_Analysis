@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>House Rent Prediction - Mumbai</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      max-width: 800px;
+      background: white;
+      margin: 20px auto;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    fieldset {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      padding: 20px;
+    }
+    legend {
+      font-weight: bold;
+      color: #007bff;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: 500;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      text-align: center;
+      font-size: 1.3em;
+      color: #222;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🏠 Mumbai House Rent Prediction</h1>
+
+  <form method="post" action="/predict">
+    <!-- Section 1: Basic Property Info -->
+    <fieldset>
+      <legend>Basic Property Details</legend>
+
+      <label>Number of Rooms</label>
+      <input type="number" name="rooms" min="1" required>
+
+      <label>Built-up Area (sqft)</label>
+      <input type="number" name="builtup_area" min="100" required>
+
+      <label>Number of Bathrooms</label>
+      <input type="number" name="bathroom" min="1" required>
+
+      <label>Number of Balconies</label>
+      <input type="number" name="balconies" min="0">
+
+      <label>Facing</label>
+      <select name="facing" required>
+        <option value="">Select</option>
+        <option>East</option>
+        <option>West</option>
+        <option>North</option>
+        <option>South</option>
+        <option>North-East</option>
+        <option>South-West</option>
+      </select>
+
+      <label>Furnish Type</label>
+      <select name="furnish_type" required>
+        <option value="">Select</option>
+        <option>Unfurnished</option>
+        <option>Semi-Furnished</option>
+        <option>Fully-Furnished</option>
+      </select>
+
+      <label>Current Floor</label>
+      <input type="number" name="current_floor" min="0" required>
+
+      <label>Total Floors</label>
+      <input type="number" name="total_floor" min="1" required>
+
+
+
+      <label>Village / Town</label>
+      <input type="text" name="village" placeholder="Enter name of the area" required>
+    </fieldset>
+
+
+      <!-- <label>Lease Type</label>
+      <select name="lease_type" required>
+        <option value="">Select</option>
+        <option>Family</option>
+        <option>Bachelor</option>
+        <option>Company</option>
+      </select> -->
+
+    <fieldset>
+      <legend>Lease Type</legend>
+      <div class="checkbox-grid">
+        <label><input type="checkbox" name="amenities" value="Family"> Family </label>
+        <label><input type="checkbox" name="amenities" value="Bachelors"> Bachelors </label>
+        <label><input type="checkbox" name="amenities" value="Company "> Company </label>
+        <!-- <label><input type="checkbox" name="amenities" value="Garden"> Garden</label>
+        <label><input type="checkbox" name="amenities" value="Sports"> Sports</label>
+        <label><input type="checkbox" name="amenities" value="Gym"> Gym</label>
+        <label><input type="checkbox" name="amenities" value="Intercom"> Intercom</label>
+        <label><input type="checkbox" name="amenities" value="Power Backup"> Power Backup</label>
+        <label><input type="checkbox" name="amenities" value="Covered Parking"> Covered Parking</label>
+        <label><input type="checkbox" name="amenities" value="Open Parking"> Open Parking</label> -->
+      </div>
+    </fieldset>
+      
+      
+    <!-- Section 2: Amenities -->
+    <fieldset>
+      <legend>Amenities</legend>
+      <div class="checkbox-grid">
+        <label><input type="checkbox" name="amenities" value="Gas Pipeline"> Gas Pipeline</label>
+        <label><input type="checkbox" name="amenities" value="Gated Community"> Gated Community</label>
+        <label><input type="checkbox" name="amenities" value="Swimming Pool"> Swimming Pool</label>
+        <label><input type="checkbox" name="amenities" value="Garden"> Garden</label>
+        <label><input type="checkbox" name="amenities" value="Sports"> Sports</label>
+        <label><input type="checkbox" name="amenities" value="Gym"> Gym</label>
+        <label><input type="checkbox" name="amenities" value="Intercom"> Intercom</label>
+        <label><input type="checkbox" name="amenities" value="Power Backup"> Power Backup</label>
+        <label><input type="checkbox" name="amenities" value="Covered Parking"> Covered Parking</label>
+        <label><input type="checkbox" name="amenities" value="Open Parking"> Open Parking</label>
+      </div>
+    </fieldset>
+
+    <!-- Section 3: Nearby Facilities -->
+    <fieldset>
+      <legend>Nearby Facilities</legend>
+      <div class="checkbox-grid">
+        <label><input type="checkbox" name="nearby" value="School"> Schools/University </label>
+        <label><input type="checkbox" name="nearby" value="Bus Stop"> Bus Stop</label>
+        <label><input type="checkbox" name="nearby" value="Railway Station"> Railway Station</label>
+        <label><input type="checkbox" name="nearby" value="Mall"> Malls</label>
+        <label><input type="checkbox" name="nearby" value="Metro"> Metro</label>
+        <label><input type="checkbox" name="nearby" value="Airport"> Airport</label>
+        <label><input type="checkbox" name="nearby" value="Hospital"> Hospital</label>
+        <label><input type="checkbox" name="nearby" value="Restaurant"> Restaurants</label>
+      </div>
+    </fieldset>
+
+    <div style="text-align:center;">
+      <button type="submit">Predict Rent</button>
+    </div>
+
+    {% if result %}
+    <div class="result">
+      <h3>Predicted Monthly Rent: ₹ {{ result }}</h3>
+    </div>
+    {% endif %}
+  </form>
+</body>
+</html>
