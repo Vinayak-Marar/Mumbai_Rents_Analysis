@@ -2,89 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recommended Properties</title>
+    <title>Recommended Rentals</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #0d1117;
-            color: #f0f6fc;
-            margin: 0;
-            padding: 0;
+        body { 
+            font-family: "Segoe UI", sans-serif; 
+            margin: 20px; 
+            background: #f4f6f8; 
         }
-
-        .map-container {
-            width: 100%;
-            height: 500px;
-            margin: 30px auto;
+        h1 { 
+            text-align: center; 
+            color: #333; 
         }
-
-        .properties {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 20px;
+        .recommendation-list { 
+            max-width: 800px; 
+            margin: 20px auto; 
         }
-
-        .card {
-            background: #161b22;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 0 10px rgba(255,255,255,0.05);
+        .card { 
+            background: white; 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
         }
-
-        .card h3 {
-            margin: 0;
-            color: #58a6ff;
+        .card h3 { 
+            margin: 0 0 5px 0; 
         }
-
-        .card p {
-            font-size: 0.9em;
-            color: #8b949e;
+        .map-container { 
+            max-width: 1200px; 
+            margin: 20px auto; 
         }
     </style>
 </head>
 <body>
-    <h2 style="text-align:center; color:#58a6ff; padding-top:20px;">Top 5 Recommendations</h2>
+    <h1>🏠 Top 5 Recommended Rentals</h1>
 
-    <div id="map" class="map-container"></div>
-
-    <div class="properties">
-        {% for prop in properties %}
+    <div class="recommendation-list">
+        {% for rec in recommendation %}
         <div class="card">
-            <h3>{{ prop.name }}</h3>
-            <p><strong>Rent:</strong> ₹{{ prop.rent }}</p>
-            <p><strong>Location:</strong> {{ prop.location }}</p>
-            <p><strong>Rooms:</strong> {{ prop.rooms }}</p>
-            <p><strong>Area:</strong> {{ prop.area }} sqft</p>
+            <h3>{{ rec.village }}</h3>
+            <p>Rent: ₹{{ rec.rent }}</p>
+            <p>Built-up Area: {{ rec.builtup_area }} sqft</p>
+            <p>Rooms: {{ rec.rooms }} | Bathrooms: {{ rec.bathroom }}</p>
+            {% if rec.balconies %}<p>Balconies: {{ rec.balconies }}</p>{% endif %}
+            {% if rec.lease_type %}<p>Lease Type: {{ rec.lease_type }}</p>{% endif %}
         </div>
         {% endfor %}
     </div>
 
-    <script>
-        const data = [{
-            type: 'scattermapbox',
-            mode: 'markers',
-            lon: {{ lons | safe }},
-            lat: {{ lats | safe }},
-            text: {{ names | safe }},
-            marker: { size: 12, color: '#58a6ff' }
-        }];
-
-        const layout = {
-            dragmode: 'zoom',
-            mapbox: {
-                style: 'dark',
-                center: { lon: 72.8777, lat: 19.0760 },
-                zoom: 9
-            },
-            margin: {r:0, t:0, b:0, l:0},
-            paper_bgcolor: '#0d1117',
-            plot_bgcolor: '#0d1117'
-        };
-
-        Plotly.newPlot('map', data, layout, {displayModeBar: false});
-    </script>
+    <div class="map-container">
+        <h2>Location Map</h2>
+        {{ map_plot | safe }}
+    </div>
 </body>
 </html>

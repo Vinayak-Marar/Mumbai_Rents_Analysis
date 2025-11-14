@@ -124,3 +124,63 @@ def visualization_page(request: Request):
 def get_bivariate_plot(feature: str = Form(...)):
     img_base64 = get_bivariate_plot_base64(feature)
     return JSONResponse(content={"img": img_base64})
+
+@app.get("/recommendation")
+def recommendation_form(request: Request):
+    # Show the form
+    return templates.TemplateResponse("recommendation.html", {"request": request})
+
+
+@app.post("/recommendation", response_class=HTMLResponse)
+def recommendation_page(
+    request: Request,
+    village: str = None,
+    budget: float = None,
+    lease: str = None,
+    area: float = None,
+    rooms: int = None,
+    bedrooms: int = None
+):
+    # Filter dataset based on user inputs
+    if village:  # only filter if village input is provided
+        filtered_df = df[df['area'].astype(str).str.contains(village, case=False, na=False)]
+    else:
+        filtered_df = df.copy()
+        
+    if budget:
+        filtered_df = filtered_df[filtered_df['rent'] <= budget]
+    if area:
+        filtered_df = filtered_df[filtered_df['builtup_area'] >= area]
+    if rooms:
+        filtered_df = filtered_df[filtered_df['rooms'] >= rooms]
+    if bedrooms and 'bedrooms' in df.columns:
+        filtered_df = filtered_df[filtered_df['bedrooms'] >= bedrooms]
+    if lease:
+        # assuming you have a column 'lease_type' in lowercase
+        filtered_df = filtered_df[filtered_df['lease_type'].str.lower() == lease.lower()]
+
+    # Get top 5 recommendations by rent (closest to budget or cheapest)
+    recommendation = filtered_df.nsmallest(5, 'rent')
+
+    # Plotly map with markers
+    if not recommendation.empty:
+        fig = px.scatter_mapbox(
+            recommendation,
+            lat="latitude",
+            lon="longitude",
+            hover_name="sector area",
+            hover_data=["rent", "rooms", "builtup_area"],
+            zoom=12,
+            height=500
+        )
+        fig.update_layout(mapbox_style="carto-positron")
+        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+        map_html = fig.to_html(full_html=False, config={"scrollZoom": True})
+    else:
+        map_html = "<p>No recommendations found for your criteria.</p>"
+
+    return templates.TemplateResponse("recommendation_results.html", {
+        "request": request,
+        "recommendation": recommendation.to_dict(orient="records"),
+        "map_plot": map_html
+    })
