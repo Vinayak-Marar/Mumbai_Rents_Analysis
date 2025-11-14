@@ -10,6 +10,8 @@ experiment/final_df.csv
 src.egg-info
 models/
 model.pkl
+final_df.csv
+full_df.csv
 # C extensions
 *.so
 

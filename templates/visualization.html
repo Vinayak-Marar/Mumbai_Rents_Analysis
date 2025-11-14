@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rent Visualizations - Mumbai</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    body { font-family: "Segoe UI", sans-serif; margin: 0; padding: 20px; background: #f4f6f8; }
+    h1 { text-align: center; color: #333; }
+    .plot-container { margin: 20px auto; max-width: 1200px; }
+    select { padding: 6px; font-size: 16px; margin-bottom: 10px; }
+    #bivariatePlot img { width: 100%; max-width: 800px; }
+  </style>
+</head>
+<body>
+  <h1>🏠 Mumbai Rent Visualizations</h1>
+
+  <div class="plot-container">
+    <h2>Rent Density Map</h2>
+    {{ map_plot | safe }}
+  </div>
+
+  <div class="plot-container">
+    <h2>Bivariate Visualization</h2>
+    <label for="featureSelect">Select Feature:</label>
+    <select id="featureSelect">
+      {% for feature in features %}
+        <option value="{{ feature }}" {% if feature==selected_feature %}selected{% endif %}>
+          {{ feature.replace("_"," ").title() }}
+        </option>
+      {% endfor %}
+    </select>
+    <div id="bivariatePlot">
+      <img id="bivarImg" src="{{ bivar_image }}" alt="Bivariate Plot">
+    </div>
+  </div>
+
+  <script>
+    const featureSelect = document.getElementById("featureSelect");
+    const bivarImg = document.getElementById("bivarImg");
+
+    featureSelect.addEventListener("change", function() {
+        const selectedFeature = this.value;
+
+        const formData = new FormData();
+        formData.append("feature", selectedFeature);
+
+        fetch("/get_bivariate_plot", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            bivarImg.src = data.img;
+        })
+        .catch(error => console.error("Error fetching plot:", error));
+    });
+  </script>
+</body>
+</html>

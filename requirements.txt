@@ -5,4 +5,5 @@ mlflow
 fastapi
 python-multipart
 uvicorn
+plotly
 -e .
