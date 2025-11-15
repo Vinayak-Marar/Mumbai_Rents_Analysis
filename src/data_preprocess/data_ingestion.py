@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 import os
 import yaml
 import json
+import csv
 # import logging
 
 from src.logger.logger import logging
@@ -61,15 +62,15 @@ def convert_to_csv(df_json: json) -> pd.DataFrame:
         raise
 
 
-def save_data(train_data: pd.DataFrame, test_data: pd.DataFrame, data_path: str) -> None:
+def save_data(data: pd.DataFrame, data_path: str) -> None:
   
     try:
         logging.info('Saving the data ')
         raw_data_path = os.path.join(data_path, 'ingested')
         os.makedirs(raw_data_path, exist_ok=True)
-        train_data.to_csv(os.path.join(raw_data_path, "train.csv"), index=False)
-        test_data.to_csv(os.path.join(raw_data_path, "test.csv"), index=False)
-        logging.info('Train and test data saved to %s', raw_data_path)
+        data.to_csv(os.path.join(raw_data_path, "data.csv"), index=False, quoting = csv.QUOTE_ALL, escapechar="\\")
+        # test_data.to_csv(os.path.join(raw_data_path, "test.csv"), index=False,  quoting = csv.QUOTE_ALL, escapechar="\\")
+        logging.info('Data saved to %s', raw_data_path)
     except Exception as e:
         logging.error('Unexpected error occurred while saving the data: %s', e)
         raise
@@ -94,8 +95,8 @@ def main():
         final_df = validator.run_all_checks()
 
 
-        train_data, test_data = train_test_split(final_df, test_size=test_size, random_state=42)
-        save_data(train_data, test_data, data_path='./data')
+        # train_data, test_data = train_test_split(final_df, test_size=test_size, random_state=42)
+        save_data(final_df, data_path='./data')
 
         logging.info("Data Ingestion Completed")
         
