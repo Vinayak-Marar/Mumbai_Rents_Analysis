@@ -72,10 +72,12 @@ async def predict_rent(
 
     print(input_data)
     # Return HTML page with result
-    return templates.TemplateResponse("prediction.html", {
-        "request": request,
-        "result": round(predicted_rent, 2)
-    })
+
+    return JSONResponse(content={"result": round(float(predicted_rent), 2)})
+    # return templates.TemplateResponse("prediction.html", {
+    #     "request": request,
+    #     "result": round(predicted_rent, 2)
+    # })
 
 
 # @app.get("/visualize", response_class=HTMLResponse)

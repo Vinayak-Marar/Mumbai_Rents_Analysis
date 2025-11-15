@@ -3,77 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <title>House Rent Prediction - Mumbai</title>
+
   <link rel="stylesheet" href="/static/css/style.css">
+
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
-      background-color: #f4f6f8;
       margin: 0;
       padding: 20px;
+
+      /* Dark Theme */
+      background-color: #121212;
+      color: #e0e0e0;
+
+      /* Background Image */
+      background-image: url('/static/images/mumbai_skyline.jpg'); 
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
     }
+
     h1 {
       text-align: center;
-      color: #333;
+      color: #ffffff;
     }
+
     form {
       max-width: 800px;
-      background: white;
+      background: rgba(0,0,0,0.75);
       margin: 20px auto;
       padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 10px rgba(255,255,255,0.1);
+      color: #e0e0e0;
     }
+
     fieldset {
-      border: 1px solid #ccc;
+      border: 1px solid #444;
       border-radius: 8px;
       margin-bottom: 20px;
       padding: 20px;
     }
+
     legend {
       font-weight: bold;
-      color: #007bff;
+      color: #90caf9;
     }
+
     label {
       display: block;
       margin: 10px 0 5px;
       font-weight: 500;
+      color: #ddd;
     }
+
     input, select {
       width: 100%;
       padding: 8px;
-      border: 1px solid #ccc;
+      border: 1px solid #555;
       border-radius: 6px;
+      background: #1e1e1e;
+      color: #fff;
     }
+
     .checkbox-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 10px;
     }
+
     button {
-      background-color: #007bff;
+      background-color: #1e88e5;
       color: white;
       border: none;
-      padding: 10px 20px;
+      padding: 12px 22px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
+      width: 200px;
     }
+
     button:hover {
-      background-color: #0056b3;
+      background-color: #1565c0;
     }
+
     .result {
       text-align: center;
-      font-size: 1.3em;
-      color: #222;
-      margin-top: 20px;
+      font-size: 1.4em;
+      margin-top: 25px;
+      color: #ffffff;
+      font-weight: 600;
     }
   </style>
 </head>
+
 <body>
+
   <h1>🏠 Mumbai House Rent Prediction</h1>
 
-  <form method="post" action="/prediction">
-    <!-- Section 1: Basic Property Info -->
+  <form id="rentForm">
     <fieldset>
       <legend>Basic Property Details</legend>
 
@@ -114,39 +142,19 @@
       <label>Total Floors</label>
       <input type="number" name="total_floor" min="1" required>
 
-
-
       <label>Village / Town</label>
       <input type="text" name="village" placeholder="Enter name of the area" required>
     </fieldset>
-
-
-      <!-- <label>Lease Type</label>
-      <select name="lease_type" required>
-        <option value="">Select</option>
-        <option>Family</option>
-        <option>Bachelor</option>
-        <option>Company</option>
-      </select> -->
 
     <fieldset>
       <legend>Lease Type</legend>
       <div class="checkbox-grid">
         <label><input type="checkbox" name="amenities" value="Family"> Family </label>
         <label><input type="checkbox" name="amenities" value="Bachelors"> Bachelors </label>
-        <label><input type="checkbox" name="amenities" value="Company "> Company </label>
-        <!-- <label><input type="checkbox" name="amenities" value="Garden"> Garden</label>
-        <label><input type="checkbox" name="amenities" value="Sports"> Sports</label>
-        <label><input type="checkbox" name="amenities" value="Gym"> Gym</label>
-        <label><input type="checkbox" name="amenities" value="Intercom"> Intercom</label>
-        <label><input type="checkbox" name="amenities" value="Power Backup"> Power Backup</label>
-        <label><input type="checkbox" name="amenities" value="Covered Parking"> Covered Parking</label>
-        <label><input type="checkbox" name="amenities" value="Open Parking"> Open Parking</label> -->
+        <label><input type="checkbox" name="amenities" value="Company"> Company </label>
       </div>
     </fieldset>
-      
-      
-    <!-- Section 2: Amenities -->
+
     <fieldset>
       <legend>Amenities</legend>
       <div class="checkbox-grid">
@@ -163,7 +171,6 @@
       </div>
     </fieldset>
 
-    <!-- Section 3: Nearby Facilities -->
     <fieldset>
       <legend>Nearby Facilities</legend>
       <div class="checkbox-grid">
@@ -182,11 +189,28 @@
       <button type="submit">Predict Rent</button>
     </div>
 
-    {% if result %}
-    <div class="result">
-      <h3>Predicted Monthly Rent: ₹ {{ result }}</h3>
-    </div>
-    {% endif %}
+    <div class="result"></div>
   </form>
+
+  <!-- AJAX SCRIPT -->
+  <script>
+    document.querySelector("#rentForm").addEventListener("submit", async function (e) {
+        e.preventDefault(); // stop reload
+
+        const formData = new FormData(this);
+
+        const response = await fetch("/prediction", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        document.querySelector(".result").innerHTML = `
+            <h3>Predicted Monthly Rent: ₹ ${data.result}</h3>
+        `;
+    });
+  </script>
+
 </body>
 </html>
