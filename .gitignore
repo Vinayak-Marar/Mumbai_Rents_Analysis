@@ -12,6 +12,7 @@ models/
 model.pkl
 final_df.csv
 full_df.csv
+logs/
 # C extensions
 *.so
 
