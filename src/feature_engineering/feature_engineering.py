@@ -57,6 +57,13 @@ def creating_new_features(data: pd.DataFrame, lat_long: pd.DataFrame) -> pd.Data
             logging.error('Unexpected error occurred while creating latitude and longitude: %s', e)
             raise
 
+        try:
+            data['rent_density'] = data['rent'] / data['builtup_area']
+            logging.info("Created rent_density column")
+        except:
+            logging.error('Unexpected error occurred while creating rent density column: %s', e)
+            raise
+
         return data
 
     except Exception:
@@ -83,6 +90,9 @@ if __name__ == '__main__':
     lat_long = pd.read_excel('./data/lat_long.xlsx')
     # test = load_data('./data/processed/test.csv')
     data = creating_new_features(data, lat_long)
+
+    save_data(data, './data/visualization_data/data.csv')
+
     X = data.drop('rent', axis = 1)
     y = data['rent']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
