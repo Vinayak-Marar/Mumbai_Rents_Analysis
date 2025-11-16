@@ -12,6 +12,10 @@ from datetime import datetime
 
 from src.logger.logger import logging
 
+import warnings
+warnings.simplefilter("ignore", UserWarning)
+warnings.filterwarnings("ignore")
+
 
 # Below code block is for production use
 # -------------------------------------------------------------------------------------
@@ -100,20 +104,20 @@ def save_metrics(metrics: dict, file_path: str) -> None:
         logging.error('Error occurred while saving the metrics: %s', e)
         raise
 
-def save_model_info(run_id: str, model_path: str, file_path: str) -> None:
-    """Save the model run ID and path to a JSON file."""
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)   
-    try:
-        model_info = {'run_id': run_id, 'model_path': model_path}
-        with open(file_path, 'w') as file:
-            json.dump(model_info, file, indent=4)
-        logging.debug('Model info saved to %s', file_path)
-    except Exception as e:
-        logging.error('Error occurred while saving the model info: %s', e)
-        raise
+# def save_model_info(run_id: str, model_path: str, file_path: str) -> None:
+#     """Save the model run ID and path to a JSON file."""
+#     os.makedirs(os.path.dirname(file_path), exist_ok=True)   
+#     try:
+#         model_info = {'run_id': run_id, 'model_path': model_path}
+#         with open(file_path, 'w') as file:
+#             json.dump(model_info, file, indent=4)
+#         logging.debug('Model info saved to %s', file_path)
+#     except Exception as e:
+#         logging.error('Error occurred while saving the model info: %s', e)
+#         raise
 
 def main():
-    mlflow.set_experiment("my-dvc-pipeline")
+    mlflow.set_experiment("model-evaluation")
     with mlflow.start_run(run_name=f"RandomForest_{datetime.now():%Y%m%d_%H%M%S}") as run:  
         try:
             reg = load_model('./models/model.pkl')
@@ -129,17 +133,9 @@ def main():
             for metric_name, metric_value in metrics.items():
                 mlflow.log_metric(metric_name, metric_value)
             
-            # Log model parameters to MLflow
-            if hasattr(reg, 'get_params'):
-                params = reg.get_params()
-                for param_name, param_value in params.items():
-                    mlflow.log_param(param_name, param_value)
-            
-            # Log model to MLflow
-            mlflow.sklearn.log_model(reg, name = "model")
-            
+
             # Save model info
-            save_model_info(run.info.run_id, "model", 'reports/experiment_info.json')
+            # save_model_info(run.info.run_id, "model", 'reports/experiment_info.json')
             
             # Log the metrics file to MLflow
             mlflow.log_artifact('reports/metrics.json')
