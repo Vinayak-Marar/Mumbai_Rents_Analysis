@@ -13,7 +13,7 @@ import os
 
 app = FastAPI()
 
-df = pd.read_csv("full_df.csv")
+df = pd.read_csv("data/visualization_data/data.csv")
 bivariate_features = ["builtup_area", "bathroom", "rooms", "balconies", "current_floor", "total_floor"]
 
 def get_bivariate_plot_base64(feature: str):
@@ -98,12 +98,12 @@ def visualization_page(request: Request):
         df,
         lat="latitude",
         lon="longitude",
-        z="rent",
-        radius=10,
+        z="rent_density",
+        radius=17,
         center=dict(lat=19.0760, lon=72.8777),
         zoom=10,
         mapbox_style="carto-positron",
-        hover_name="sector area",
+        hover_name="sector_area",
         hover_data=["rent", "rooms", "builtup_area"]
     )
     fig_map.update_layout(dragmode="zoom")
@@ -170,7 +170,7 @@ def recommendation_page(
             recommendation,
             lat="latitude",
             lon="longitude",
-            hover_name="sector area",
+            hover_name="sector_area",
             hover_data=["rent", "rooms", "builtup_area"],
             zoom=12,
             height=500
