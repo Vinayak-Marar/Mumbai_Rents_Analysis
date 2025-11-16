@@ -2,6 +2,7 @@ numpy
 pandas
 scikit-learn
 mlflow
+dvc
 fastapi
 python-multipart
 uvicorn

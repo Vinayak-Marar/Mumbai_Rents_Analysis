@@ -85,7 +85,7 @@ def main():
 
         root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
         print(f"root_dir: {root_dir}")
-        path = os.path.join(root_dir, "data", "raw_data.json")
+        path = os.path.join(root_dir, "data/raw", "raw_data.json")
         
         
         df_json = load_data(data_path=path)

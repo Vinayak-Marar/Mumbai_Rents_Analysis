@@ -87,7 +87,7 @@ def save_data(df: pd.DataFrame, file_path: str) -> None:
 if __name__ == '__main__':
     test_size = 0.2
     data = load_data('./data/processed/data.csv')
-    lat_long = pd.read_excel('./data/lat_long.xlsx')
+    lat_long = pd.read_excel('./data/raw/lat_long.xlsx')
     # test = load_data('./data/processed/test.csv')
     data = creating_new_features(data, lat_long)
 
@@ -104,3 +104,4 @@ if __name__ == '__main__':
 
     logging.info("Feature engineering completed")
     # save_model(transformer, './models/transformer.pkl')
+
