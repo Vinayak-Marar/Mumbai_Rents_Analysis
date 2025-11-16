@@ -83,7 +83,14 @@ if __name__ == '__main__':
     lat_long = pd.read_excel('./data/lat_long.xlsx')
     # test = load_data('./data/processed/test.csv')
     data = creating_new_features(data, lat_long)
-    train_data, test_data = train_test_split(data, test_size=test_size, random_state=42)
-    save_data(train_data, './data/interim/train.csv')
-    save_data(test_data, './data/interim/test.csv')
+    X = data.drop('rent', axis = 1)
+    y = data['rent']
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+
+    save_data(X_train, './data/interim/X_train.csv')
+    save_data(X_test, './data/interim/X_test.csv')
+    save_data(y_train, './data/interim/y_train.csv')
+    save_data(y_test, './data/interim/y_test.csv')
+
+    logging.info("Feature engineering completed")
     # save_model(transformer, './models/transformer.pkl')
