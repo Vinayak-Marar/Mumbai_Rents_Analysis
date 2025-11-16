@@ -8,4 +8,5 @@ uvicorn
 plotly
 joblib
 yaml
+openpyxl
 -e .
