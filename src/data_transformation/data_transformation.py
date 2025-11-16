@@ -29,7 +29,7 @@ def transform_data(X_train: pd.DataFrame, X_test: pd.DataFrame) -> pd.DataFrame:
     try:
         logging.info("Transforming the data")
 
-        final_features = ["builtup_area","rooms","furnish","address","bathrooms", "balcony",\
+        final_features = ["builtup_area","rooms","furnish","bathrooms", "balcony",\
                           "facing","gas_pipline","gated_community","swimming_pool","gym","intercom",\
                           "power_backup","garden","sports","current_floor","total_floor","lease_type",\
                           "covered_parking","open_parking","school/university","airport","bus_stop",\
@@ -37,7 +37,7 @@ def transform_data(X_train: pd.DataFrame, X_test: pd.DataFrame) -> pd.DataFrame:
         
         categorical_features = ["facing", "lease_type"]
         ordinal_features = ["furnish"]
-        furnish_order=[["Unfunished", "Semi Furnished", "Fully Furnished"]]
+        furnish_order=[["Unfurnished", "Semi Furnished", "Fully Furnished"]]
 
         try:
             X_train = X_train[final_features]
@@ -51,7 +51,7 @@ def transform_data(X_train: pd.DataFrame, X_test: pd.DataFrame) -> pd.DataFrame:
         try:
             transformer = ColumnTransformer(
                 transformers=[
-                    ("ohe", OneHotEncoder(handle_unknown="ignore"), categorical_features),
+                    ("ohe", OneHotEncoder(handle_unknown="ignore", sparse_output=False), categorical_features),
                     ("ord", OrdinalEncoder(categories=furnish_order,
                                         handle_unknown="use_encoded_value",
                                         unknown_value=-1),
@@ -60,6 +60,8 @@ def transform_data(X_train: pd.DataFrame, X_test: pd.DataFrame) -> pd.DataFrame:
                 remainder="passthrough"   
                 )
             
+            transformer.set_output(transform="pandas")
+
             X_train= transformer.fit_transform(X_train)
 
             X_test = transformer.transform(X_test)
@@ -76,9 +78,9 @@ def transform_data(X_train: pd.DataFrame, X_test: pd.DataFrame) -> pd.DataFrame:
         raise
 
 
-def save_data_np(tensor: np.ndarray, file_path: str) -> None:
+def save_data(df: pd.DataFrame, file_path: str) -> None:
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
-    np.save(file_path, tensor)
+    df.to_csv(file_path, index=False)
     logging.info('Data saved to %s', file_path)
 
 
@@ -100,10 +102,10 @@ if __name__ == '__main__':
     X_train, X_test, transformer = transform_data(X_train ,X_test)
 
 
-    save_data_np(X_train, './data/transformed/X_train.csv')
-    save_data_np(X_test, './data/transformed/X_test.csv')
-    save_data_np(y_train, './data/transformed/y_train.csv')
-    save_data_np(y_test, './data/transformed/y_test.csv')
+    save_data(X_train, './data/transformed/X_train.csv')
+    save_data(X_test, './data/transformed/X_test.csv')
+    save_data(y_train, './data/transformed/y_train.csv')
+    save_data(y_test, './data/transformed/y_test.csv')
 
     save_model(transformer, './models/transformer.pkl')
 
