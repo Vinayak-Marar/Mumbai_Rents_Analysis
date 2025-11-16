@@ -390,3 +390,49 @@ def create_new_df(df: pd.DataFrame) -> pd.DataFrame :
         raise
 
     return data
+
+
+def get_lat_long(df:pd.DataFrame ,lat_long:pd.DataFrame):
+    latitude_list = []
+    longitude_list = []
+
+    for index, row in df.iterrows():
+        try:
+            # Try matching by area + sector
+            match = lat_long[
+                (lat_long["Locality"] == row['area']) &
+                (lat_long["Location Name"] == row['sector'])
+            ]
+
+            if not match.empty:
+                latitude = match["Latitude (N)"].values[0]
+                longitude = match["Longitude (E)"].values[0]
+            else:
+                # Try matching by area twice if sector not found
+                match_alt = lat_long[
+                    (lat_long["Locality"] == row['area']) &
+                    (lat_long["Location Name"] == row['area'])
+                ]
+                if not match_alt.empty:
+                    latitude = match_alt["Latitude (N)"].values[0]
+                    longitude = match_alt["Longitude (E)"].values[0]
+                else:
+                    match_alt_2 = lat_long[
+                        (lat_long["Locality"] == row['area']) |
+                        (lat_long["Location Name"] == row['area'])
+                    ]
+
+                    if not match_alt_2.empty:
+                        latitude = match_alt_2["Latitude (N)"].values[0]
+                        longitude = match_alt_2["Longitude (E)"].values[0]
+
+                    else:
+                        latitude, longitude = 0, 0
+
+        except Exception as e:
+            latitude, longitude = 0, 0
+
+        latitude_list.append(latitude)
+        longitude_list.append(longitude)
+
+    return latitude_list, longitude_list
