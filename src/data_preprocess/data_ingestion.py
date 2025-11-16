@@ -68,7 +68,7 @@ def save_data(data: pd.DataFrame, data_path: str) -> None:
         logging.info('Saving the data ')
         raw_data_path = os.path.join(data_path, 'ingested')
         os.makedirs(raw_data_path, exist_ok=True)
-        data.to_csv(os.path.join(raw_data_path, "data.csv"), index=False, quoting = csv.QUOTE_ALL, escapechar="\\")
+        data.to_excel(os.path.join(raw_data_path, "data.xlsx"), index=False)
         # test_data.to_csv(os.path.join(raw_data_path, "test.csv"), index=False,  quoting = csv.QUOTE_ALL, escapechar="\\")
         logging.info('Data saved to %s', raw_data_path)
     except Exception as e:
