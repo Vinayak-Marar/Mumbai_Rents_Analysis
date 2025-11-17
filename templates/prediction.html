@@ -142,6 +142,12 @@
       <label>Total Floors</label>
       <input type="number" name="total_floor" min="1" required>
 
+      <label>Covered Parking</label>
+      <input type="number" name="covered_parking" min="0">
+
+      <label>Open Parking</label>
+      <input type="number" name="open_parking" min="0">
+
       <label>Village / Town</label>
       <input type="text" name="village" placeholder="Enter name of the area" required>
     </fieldset>
@@ -149,39 +155,39 @@
     <fieldset>
       <legend>Lease Type</legend>
       <div class="checkbox-grid">
-        <label><input type="checkbox" name="amenities" value="Family"> Family </label>
-        <label><input type="checkbox" name="amenities" value="Bachelors"> Bachelors </label>
-        <label><input type="checkbox" name="amenities" value="Company"> Company </label>
+        <label><input type="checkbox" name="lease" value="Family"> Family </label>
+        <label><input type="checkbox" name="lease" value="Bachelors"> Bachelors </label>
+        <label><input type="checkbox" name="lease" value="Company"> Company </label>
       </div>
     </fieldset>
 
     <fieldset>
       <legend>Amenities</legend>
       <div class="checkbox-grid">
-        <label><input type="checkbox" name="amenities" value="Gas Pipeline"> Gas Pipeline</label>
-        <label><input type="checkbox" name="amenities" value="Gated Community"> Gated Community</label>
-        <label><input type="checkbox" name="amenities" value="Swimming Pool"> Swimming Pool</label>
-        <label><input type="checkbox" name="amenities" value="Garden"> Garden</label>
-        <label><input type="checkbox" name="amenities" value="Sports"> Sports</label>
-        <label><input type="checkbox" name="amenities" value="Gym"> Gym</label>
-        <label><input type="checkbox" name="amenities" value="Intercom"> Intercom</label>
-        <label><input type="checkbox" name="amenities" value="Power Backup"> Power Backup</label>
-        <label><input type="checkbox" name="amenities" value="Covered Parking"> Covered Parking</label>
-        <label><input type="checkbox" name="amenities" value="Open Parking"> Open Parking</label>
+        <label><input type="checkbox" name="amenities" value="gas_pipeline"> Gas Pipeline</label>
+        <label><input type="checkbox" name="amenities" value="gated_community"> Gated Community</label>
+        <label><input type="checkbox" name="amenities" value="swimming_pool"> Swimming Pool</label>
+        <label><input type="checkbox" name="amenities" value="garden"> Garden</label>
+        <label><input type="checkbox" name="amenities" value="sports"> Sports</label>
+        <label><input type="checkbox" name="amenities" value="gym"> Gym</label>
+        <label><input type="checkbox" name="amenities" value="intercom"> Intercom</label>
+        <label><input type="checkbox" name="amenities" value="power_backup"> Power Backup</label>
+        <label><input type="checkbox" name="amenities" value="covered_parking"> Covered Parking</label>
+        <label><input type="checkbox" name="amenities" value="open_parking"> Open Parking</label>
       </div>
     </fieldset>
 
     <fieldset>
       <legend>Nearby Facilities</legend>
       <div class="checkbox-grid">
-        <label><input type="checkbox" name="nearby" value="School"> Schools/University </label>
-        <label><input type="checkbox" name="nearby" value="Bus Stop"> Bus Stop</label>
-        <label><input type="checkbox" name="nearby" value="Railway Station"> Railway Station</label>
-        <label><input type="checkbox" name="nearby" value="Mall"> Malls</label>
-        <label><input type="checkbox" name="nearby" value="Metro"> Metro</label>
-        <label><input type="checkbox" name="nearby" value="Airport"> Airport</label>
-        <label><input type="checkbox" name="nearby" value="Hospital"> Hospital</label>
-        <label><input type="checkbox" name="nearby" value="Restaurant"> Restaurants</label>
+        <label><input type="checkbox" name="nearby" value="school/university"> Schools/University </label>
+        <label><input type="checkbox" name="nearby" value="bus_stop"> Bus Stop</label>
+        <label><input type="checkbox" name="nearby" value="railway_station"> Railway Station</label>
+        <label><input type="checkbox" name="nearby" value="mall"> Malls</label>
+        <label><input type="checkbox" name="nearby" value="metro_station"> Metro</label>
+        <label><input type="checkbox" name="nearby" value="airport"> Airport</label>
+        <label><input type="checkbox" name="nearby" value="hospital"> Hospital</label>
+        <label><input type="checkbox" name="nearby" value="restaurant"> Restaurants</label>
       </div>
     </fieldset>
 

@@ -11,10 +11,28 @@ import io, base64
 import plotly.express as px
 import os
 
-app = FastAPI()
 
+FEATURES = ["builtup_area","rooms","furnish","bathrooms", "balcony",\
+            "facing","gas_pipline","gated_community","swimming_pool","gym","intercom",\
+             "power_backup","garden","sports","current_floor","total_floor","lease_type",\
+             "covered_parking","open_parking","school/university","airport","bus_stop",\
+             "railway","mall","metro_station","hospital","restaurant","latitude","longitude"]
+
+AMENITIES = ['gas_pipeline', "gated_community", 'swimming_pool', "gym", "intercom", "power_backup", "garden", "sports"]
+
+NEARBY = ["school/university", "airport","bus_stop", "railway", "mall", "metro_station","hospital", "restaurant"]
+
+
+#import transformer and the model
+
+model = joblib.load('models/model.pkl')
+transformer = joblib.load('models/transformer.pkl')
 df = pd.read_csv("data/visualization_data/data.csv")
 bivariate_features = ["builtup_area", "bathroom", "rooms", "balconies", "current_floor", "total_floor"]
+
+
+app = FastAPI()
+
 
 def get_bivariate_plot_base64(feature: str):
     plt.figure(figsize=(8,5))
@@ -55,22 +73,45 @@ async def predict_rent(
     furnish_type: str = Form(...),
     current_floor: int = Form(...),
     total_floor: int = Form(...),
+    covered_parking: int = Form(...),
+    open_parking: int = Form(...),
     village: str = Form(...),
+    lease: list[str] = Form([]),
     amenities: list[str] = Form([]),  # For multiple checkboxes
     nearby: list[str] = Form([]),     # For multiple checkboxes
 ):
     # Prepare input features for your model
     # You need to transform categorical features like 'facing', 'furnish_type', 'village', 'amenities', 'nearby' properly
     # Here is a simple example if your model expects numeric inputs only:
-    input_data = [rooms, builtup_area, bathroom, balconies, current_floor, total_floor, village, amenities, nearby]
-    
+
+    furnish_code = 0 if furnish_type == "Unfurnished" else 1 if furnish_type == "Semi-Furnished" else 2
+
+
+    basic_inputs = [ builtup_area, rooms, furnish_code, bathroom, balconies,facing]
+    amenities_list = [1 if x.lower() in [y.lower() for y in amenities] else 0 for x in AMENITIES]
+    floors = [current_floor, total_floor, "Family"]
+    lease_type = " ".join(lease)
+    nearby_list = [1 if x.lower() in [y.lower() for y in nearby] else 0 for x in NEARBY]
+    lat_long = [19.2, 10.7]
+
+    input_data = basic_inputs + amenities_list + floors + [covered_parking, open_parking] + nearby_list + lat_long
+
+    print(f"lease: {lease_type}")
+    print(f"input: {input_data}")
+    print(f"amenities: {amenities_list}")
+    print(f"nearby: {nearby_list}") 
+
     # Make prediction
 
+    input_data = np.array(input_data)
 
-    #predicted_rent = model.predict(input_data)[0]
-    predicted_rent = 10000
+    transformed_data = transformer.transform(input_data.reshape(1,-1))
 
-    print(input_data)
+    print(1)
+    predicted_rent = model.predict(transformed_data)[0]
+    print(1)
+    # predicted_rent = 10000
+
     # Return HTML page with result
 
     return JSONResponse(content={"result": round(float(predicted_rent), 2)})
