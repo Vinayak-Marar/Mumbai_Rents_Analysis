@@ -42,6 +42,9 @@ def transform_data(X_train: pd.DataFrame, X_test: pd.DataFrame) -> pd.DataFrame:
         try:
             X_train = X_train[final_features]
             X_test = X_test[final_features]
+
+            print(X_train.iloc[0, :].values)
+
             logging.info("Filtered the data")
 
         except Exception as e:

@@ -28,8 +28,8 @@ def load_data(file_path: str) -> pd.DataFrame:
 def train_model(X_train: np.ndarray, y_train: np.ndarray, **params) -> RandomForestRegressor:
 
     try:
-        reg = RandomForestRegressor(max_depth=None, max_features=None, n_estimators=50, n_jobs=-1, min_samples_leaf=1, min_samples_split=5)
-        reg.fit(X_train, y_train.ravel())
+        reg = RandomForestRegressor(max_depth=None, max_features=None, n_estimators=500, n_jobs=-1, min_samples_leaf=1, min_samples_split=5)
+        reg.fit(X_train, y_train)
         logging.info('Model training completed')
         return reg
     except Exception as e:

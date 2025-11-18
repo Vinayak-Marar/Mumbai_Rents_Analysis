@@ -5,7 +5,10 @@ from fastapi.staticfiles import StaticFiles
 import joblib
 import numpy as np
 import pandas as pd
-# import shap
+from dotenv import load_dotenv
+from opencage.geocoder import OpenCageGeocode
+
+
 import matplotlib.pyplot as plt
 import io, base64
 import plotly.express as px
@@ -20,7 +23,7 @@ FEATURES = ["builtup_area","rooms","furnish","bathrooms", "balcony",\
 
 AMENITIES = ['gas_pipeline', "gated_community", 'swimming_pool', "gym", "intercom", "power_backup", "garden", "sports"]
 
-NEARBY = ["school/university", "airport","bus_stop", "railway", "mall", "metro_station","hospital", "restaurant"]
+NEARBY = ["school", "airport","bus_stop", "railway", "mall", "metro_station","hospital", "restaurant"]
 
 
 #import transformer and the model
@@ -30,8 +33,28 @@ transformer = joblib.load('models/transformer.pkl')
 df = pd.read_csv("data/visualization_data/data.csv")
 bivariate_features = ["builtup_area", "bathroom", "rooms", "balconies", "current_floor", "total_floor"]
 
+def normalize_lease_type(x):
+    if pd.isna(x):
+        return 'Bachelor Company Family'
+    # Split by spaces, remove empty, unique, and sort alphabetically
+    parts = sorted(set(x))
+    return ' '.join(parts)
+
+
+load_dotenv() 
+
+KEY = os.getenv("opencage")
+geocoder = OpenCageGeocode(KEY)
 
 app = FastAPI()
+
+def get_coordinates(village: str):
+    result = geocoder.geocode(village)
+    if result:
+        lat = result[0]["geometry"]["lat"]
+        lng = result[0]["geometry"]["lng"]
+        return lat, lng
+    return {"error": "Village not found"}
 
 
 def get_bivariate_plot_base64(feature: str):
@@ -50,7 +73,6 @@ def get_bivariate_plot_base64(feature: str):
     return f"data:image/png;base64,{img_base64}"
 
 
-model = joblib.load("model.pkl")
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -77,60 +99,39 @@ async def predict_rent(
     open_parking: int = Form(...),
     village: str = Form(...),
     lease: list[str] = Form([]),
-    amenities: list[str] = Form([]),  # For multiple checkboxes
-    nearby: list[str] = Form([]),     # For multiple checkboxes
+    amenities: list[str] = Form([]), 
+    nearby: list[str] = Form([]),     
 ):
-    # Prepare input features for your model
-    # You need to transform categorical features like 'facing', 'furnish_type', 'village', 'amenities', 'nearby' properly
-    # Here is a simple example if your model expects numeric inputs only:
+    lat, long = get_coordinates(village=village)
 
-    furnish_code = 0 if furnish_type == "Unfurnished" else 1 if furnish_type == "Semi-Furnished" else 2
-
-
-    basic_inputs = [ builtup_area, rooms, furnish_code, bathroom, balconies,facing]
+    basic_inputs = [ builtup_area, rooms, furnish_type, bathroom, balconies,facing]
     amenities_list = [1 if x.lower() in [y.lower() for y in amenities] else 0 for x in AMENITIES]
-    floors = [current_floor, total_floor, "Family"]
-    lease_type = " ".join(lease)
+    lease_type = normalize_lease_type(lease)
+    floors = [current_floor, total_floor, lease_type]
+    
     nearby_list = [1 if x.lower() in [y.lower() for y in nearby] else 0 for x in NEARBY]
-    lat_long = [19.2, 10.7]
+    lat_long = [lat, long]
 
     input_data = basic_inputs + amenities_list + floors + [covered_parking, open_parking] + nearby_list + lat_long
 
-    print(f"lease: {lease_type}")
-    print(f"input: {input_data}")
-    print(f"amenities: {amenities_list}")
-    print(f"nearby: {nearby_list}") 
-
+    print(lat_long)
     # Make prediction
 
-    input_data = np.array(input_data)
 
-    transformed_data = transformer.transform(input_data.reshape(1,-1))
+    input_data = np.array(input_data).reshape(1,-1)
+    input_df = pd.DataFrame(input_data, columns=FEATURES)
 
-    print(1)
-    predicted_rent = model.predict(transformed_data)[0]
-    print(1)
+    transformer.set_output(transform="pandas")
+    transformed_data = transformer.transform(input_df)
+
+    actual_df = transformed_data
+    predicted_rent = model.predict(actual_df)[0]
     # predicted_rent = 10000
 
     # Return HTML page with result
 
-    return JSONResponse(content={"result": round(float(predicted_rent), 2)})
-    # return templates.TemplateResponse("prediction.html", {
-    #     "request": request,
-    #     "result": round(predicted_rent, 2)
-    # })
+    return JSONResponse(content={"result": round(float(predicted_rent), -2)})
 
-
-# @app.get("/visualize", response_class=HTMLResponse)
-# def visualize(request: Request):
-#     # Example visualization
-#     plt.figure()
-#     plt.bar(["Age", "BMI", "Glucose"], [50, 25, 75])
-#     buf = io.BytesIO()
-#     plt.savefig(buf, format='png')
-#     buf.seek(0)
-#     img_base64 = base64.b64encode(buf.getvalue()).decode()
-#     return templates.TemplateResponse("visualize.html", {"request": request, "plot": img_base64})
 
 @app.get("/visualization", response_class=HTMLResponse)
 def visualization_page(request: Request):

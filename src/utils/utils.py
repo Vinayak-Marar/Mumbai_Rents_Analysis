@@ -230,9 +230,6 @@ def normalize_lease_type(x):
 
 
 
-
-
-
 def rename_columns(df: pd.DataFrame)  -> pd.DataFrame:
     try:
         df.rename(columns={

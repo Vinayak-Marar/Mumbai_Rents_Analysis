@@ -11,4 +11,5 @@ joblib
 yaml
 openpyxl
 httpx
+geopy
 -e .
