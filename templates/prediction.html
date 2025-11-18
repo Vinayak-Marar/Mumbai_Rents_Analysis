@@ -132,8 +132,8 @@
       <select name="furnish_type" required>
         <option value="">Select</option>
         <option>Unfurnished</option>
-        <option>Semi-Furnished</option>
-        <option>Fully-Furnished</option>
+        <option>Semi Furnished</option>
+        <option>Fully Furnished</option>
       </select>
 
       <label>Current Floor</label>
@@ -172,15 +172,15 @@
         <label><input type="checkbox" name="amenities" value="gym"> Gym</label>
         <label><input type="checkbox" name="amenities" value="intercom"> Intercom</label>
         <label><input type="checkbox" name="amenities" value="power_backup"> Power Backup</label>
-        <label><input type="checkbox" name="amenities" value="covered_parking"> Covered Parking</label>
-        <label><input type="checkbox" name="amenities" value="open_parking"> Open Parking</label>
+        <!-- <label><input type="checkbox" name="amenities" value="covered_parking"> Covered Parking</label>
+        <label><input type="checkbox" name="amenities" value="open_parking"> Open Parking</label> -->
       </div>
     </fieldset>
 
     <fieldset>
       <legend>Nearby Facilities</legend>
       <div class="checkbox-grid">
-        <label><input type="checkbox" name="nearby" value="school/university"> Schools/University </label>
+        <label><input type="checkbox" name="nearby" value="school"> Schools/University </label>
         <label><input type="checkbox" name="nearby" value="bus_stop"> Bus Stop</label>
         <label><input type="checkbox" name="nearby" value="railway_station"> Railway Station</label>
         <label><input type="checkbox" name="nearby" value="mall"> Malls</label>
@@ -212,8 +212,13 @@
 
         const data = await response.json();
 
+        const result = data.result;
+
+        const lower = Math.round((result - 0.085 * result) / 100) * 100;
+        const upper = Math.round((result + 0.075 * result) / 100) * 100;
+
         document.querySelector(".result").innerHTML = `
-            <h3>Predicted Monthly Rent: ₹ ${data.result}</h3>
+            <h3>Predicted Monthly Rent is between ₹ ${lower} to ₹ ${upper}</h3>
         `;
     });
   </script>
