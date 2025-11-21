@@ -183,7 +183,14 @@ async def predict_rent(
     amenities: list[str] = Form([]), 
     nearby: list[str] = Form([]),     
 ):
-    lat, long = get_coordinates(village=village)
+    try:
+        lat, long = get_coordinates(village=village)
+
+    except Exception as e:
+        lat, long = None, None
+        return JSONResponse(content={
+            "error": f"Could not fetch coordinates for '{village}'. Try a nearby landmark or different spelling."
+        })
 
     basic_inputs = [ builtup_area, rooms, furnish_type, bathroom, balconies,facing]
     amenities_list = [1 if x.lower() in [y.lower() for y in amenities] else 0 for x in AMENITIES]

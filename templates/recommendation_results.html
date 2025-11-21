@@ -170,6 +170,7 @@
                         <th>Rooms</th>
                         <th>Built-up Area (sqft)</th>
                         <th>Lease Type</th>
+                        <th>Link</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -185,6 +186,11 @@
                                 {% else %}
                                     N/A
                                 {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ rec.link }}" target="_blank">
+                                    click here
+                                </a>
                             </td>
 
                             <!-- {% if rec.get("similarity") is not none %}
