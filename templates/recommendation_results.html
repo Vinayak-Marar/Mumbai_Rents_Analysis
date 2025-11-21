@@ -2,58 +2,208 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recommended Rentals</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <link rel="stylesheet" href="/static/css/style.css">
     <style>
-        body { 
-            font-family: "Segoe UI", sans-serif; 
-            margin: 20px; 
-            background: #f4f6f8; 
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0d1117;
+            color: #f0f6fc;
+            margin: 0;
+            padding: 0;
         }
-        h1 { 
-            text-align: center; 
-            color: #333; 
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            background: #161b22;
+            padding: 30px 40px;
+            border-radius: 16px;
+            box-shadow: 0 0 15px rgba(255,255,255,0.05);
         }
-        .recommendation-list { 
-            max-width: 800px; 
-            margin: 20px auto; 
+
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #58a6ff;
         }
-        .card { 
-            background: white; 
-            padding: 15px; 
-            margin-bottom: 15px; 
-            border-radius: 10px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+
+        .subtitle {
+            text-align: center;
+            font-size: 0.95rem;
+            color: #8b949e;
+            margin-bottom: 25px;
         }
-        .card h3 { 
-            margin: 0 0 5px 0; 
+
+        .map-wrapper {
+            margin-bottom: 30px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #30363d;
         }
-        .map-container { 
-            max-width: 1200px; 
-            margin: 20px auto; 
+
+        .no-map {
+            padding: 30px;
+            text-align: center;
+            color: #8b949e;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+
+        thead {
+            background: #21262d;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #30363d;
+            text-align: left;
+        }
+
+        th {
+            font-weight: 600;
+            color: #c9d1d9;
+        }
+
+        tr:nth-child(even) {
+            background: #161b22;
+        }
+
+        tr:nth-child(odd) {
+            background: #0d1117;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            background: #21262d;
+            border: 1px solid #30363d;
+        }
+
+        .btn-row {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .btn {
+            background: #238636;
+            border: none;
+            padding: 10px 18px;
+            color: white;
+            font-weight: 600;
+            border-radius: 999px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            background: #2ea043;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #30363d;
+        }
+
+        .btn-outline:hover {
+            background: #21262d;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 30px 0 10px 0;
+            color: #8b949e;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+            table {
+                font-size: 0.85rem;
+            }
+            th, td {
+                padding: 8px;
+            }
+            .btn-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>🏠 Top 5 Recommended Rentals</h1>
+    <div class="container">
+        <h2>Recommended Rentals</h2>
+        <p class="subtitle">Based on your village, budget, lease type, and optional preferences</p>
 
-    <div class="recommendation-list">
-        {% for rec in recommendation %}
-        <div class="card">
-            <h3>{{ rec.village }}</h3>
-            <p>Rent: ₹{{ rec.rent }}</p>
-            <p>Built-up Area: {{ rec.builtup_area }} sqft</p>
-            <p>Rooms: {{ rec.rooms }} | Bathrooms: {{ rec.bathroom }}</p>
-            {% if rec.balconies %}<p>Balconies: {{ rec.balconies }}</p>{% endif %}
-            {% if rec.lease_type %}<p>Lease Type: {{ rec.lease_type }}</p>{% endif %}
+        <!-- Map Section -->
+        <div class="map-wrapper">
+            {% if map_plot %}
+                {{ map_plot | safe }}
+            {% else %}
+                <div class="no-map">
+                    Map is not available for this search.
+                </div>
+            {% endif %}
         </div>
-        {% endfor %}
-    </div>
 
-    <div class="map-container">
-        <h2>Location Map</h2>
-        {{ map_plot | safe }}
+        <!-- Recommendations Table -->
+        {% if recommendation and recommendation|length > 0 %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Location</th>
+                        <th>Rent (₹)</th>
+                        <th>Rooms</th>
+                        <th>Built-up Area (sqft)</th>
+                        <th>Lease Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in recommendation %}
+                        <tr>
+                            <td>{{ rec.get("sector_area") or rec.get("area") or "N/A" }}</td>
+                            <td>{{ rec.get("rent") | int if rec.get("rent") is not none else "N/A" }}</td>
+                            <td>{{ rec.get("rooms") or "N/A" }}</td>
+                            <td>{{ rec.get("builtup_area") or "N/A" }}</td>
+                            <td>
+                                {% if rec.get("lease_type") %}
+                                    <span class="tag">{{ rec.get("lease_type") }}</span>
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+
+                            <!-- {% if rec.get("similarity") is not none %}
+                                <td>{{ (rec.get("similarity") * 100) | round(1) }}%</td>
+                            {% endif %} -->
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="no-results">
+                No recommendations found for your criteria.  
+                Try adjusting your budget, area, or other filters.
+            </div>
+        {% endif %}
+
+        <div class="btn-row">
+            <a href="/recommendation" class="btn btn-outline">← Back to Search</a>
+        </div>
     </div>
 </body>
 </html>
