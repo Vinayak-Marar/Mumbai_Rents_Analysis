@@ -7,6 +7,8 @@ import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 from opencage.geocoder import OpenCageGeocode
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import MinMaxScaler
 
 
 import matplotlib.pyplot as plt
@@ -31,14 +33,52 @@ NEARBY = ["school", "airport","bus_stop", "railway", "mall", "metro_station","ho
 model = joblib.load('models/model.pkl')
 transformer = joblib.load('models/transformer.pkl')
 df = pd.read_csv("data/visualization_data/data.csv")
-bivariate_features = ["builtup_area", "bathroom", "rooms", "balconies", "current_floor", "total_floor"]
+quantiles = df["rent_density"].quantile([0, 0.33,0.5, 0.66, 0.85, 1]).round(6)
+
+df["density_bin"] = pd.cut(
+    df["rent_density"],
+    bins=quantiles,
+    labels=["Very_Low", "Low", "Medium", "High", "Very_High"],
+    # include_lowest=True
+)
+
+df["density_bin"] = pd.Categorical(
+    df["density_bin"],
+    categories=["Very_Low", "Low", "Medium", "High", "Very_High"],
+    ordered=True
+)
+
+color_map = {
+    "Very Low":  "#deebf7",  # lightest
+    "Low":       "#9ecae1",
+    "Medium":    "#6baed6",
+    "High":      "#3182bd",
+    "Very High": "#08519c"   # darkest
+}
+
+
+# print(df)
+
+bivariate_features = ["builtup_area", "bathrooms","furnish", "facing", "rooms", "balcony", "current_floor", "total_floor"]
 
 def normalize_lease_type(x):
-    if pd.isna(x):
-        return 'Bachelor Company Family'
-    # Split by spaces, remove empty, unique, and sort alphabetically
-    parts = sorted(set(x))
-    return ' '.join(parts)
+    # Handle missing values properly
+    if x is None or (isinstance(x, float) and pd.isna(x)):
+        return "Bachelor Company Family"
+
+    # If x is a list → convert cleanly
+    if isinstance(x, list):
+        parts = sorted(set(x))
+
+    # If x is a string like "Bachelor Company"
+    elif isinstance(x, str):
+        parts = sorted(set(x.split()))
+
+    # If it's something weird
+    else:
+        return "Bachelor Company Family"
+
+    return " ".join(parts)
 
 
 load_dotenv() 
@@ -56,21 +96,58 @@ def get_coordinates(village: str):
         return lat, lng
     return {"error": "Village not found"}
 
+def calculate_distance(lat1, lon1, lat2, lon2):
+    return np.sqrt((lat1 - lat2)**2 + (lon1 - lon2)**2)
 
-def get_bivariate_plot_base64(feature: str):
-    plt.figure(figsize=(8,5))
-    plt.scatter(df[feature], df["rent"], c='blue', alpha=0.6)
-    plt.xlabel(feature.replace("_"," ").title())
-    plt.ylabel("Rent")
-    plt.title(f"Rent vs {feature.replace('_',' ').title()}")
-    plt.tight_layout()
 
+def get_bivariate_plot_base64(feature):
+    plt.style.use("dark_background")
+    fig, ax = plt.subplots(figsize=(20, 10))
+
+    # CASE 1: Numeric Feature → Bin → Mean Rent Bar Plot
+    # if pd.api.types.is_numeric_dtype(df[feature]):
+    if feature == "builtup_area":
+
+        # Create quantile bins (automatically balanced)
+        df["bin"] = pd.qcut(df[feature], q=10, duplicates="drop")
+
+        # Compute mean rent per bin
+        bin_means = df.groupby("bin")["rent"].mean()
+
+        # Plot
+        bin_means = bin_means.sort_index()
+        bin_means.plot(kind="bar", ax=ax)
+
+        ax.set_title(f"Mean Rent vs {feature} (Binned)", color="white")
+        ax.set_xlabel(f"{feature} (binned ranges)", color="white")
+        ax.set_ylabel("Mean Rent", color="white")
+        plt.xticks(rotation=45, ha="right", color="white")
+
+        # Cleanup
+        df.drop(columns=["bin"], inplace=True)
+
+    # CASE 2: Categorical Feature → Mean Rent Bar Plot
+    else:
+        means = df.groupby(feature)["rent"].mean().sort_values()
+
+        means = means.sort_index()
+        means.plot(kind="bar", ax=ax)
+
+        ax.set_title(f"Mean Rent vs {feature}", color="white")
+        ax.set_xlabel(feature, color="white")
+        ax.set_ylabel("Mean Rent", color="white")
+        plt.xticks(rotation=45, ha="right", color="white")
+
+    # Return base64 image
     buf = io.BytesIO()
-    plt.savefig(buf, format="png")
-    plt.close()
+    plt.savefig(buf, format="png", bbox_inches="tight")
     buf.seek(0)
-    img_base64 = base64.b64encode(buf.read()).decode("utf-8")
-    return f"data:image/png;base64,{img_base64}"
+    encoded = base64.b64encode(buf.read()).decode()
+    plt.close()
+
+    return f"data:image/png;base64,{encoded}"
+
+
 
 
 templates = Jinja2Templates(directory="templates")
@@ -78,6 +155,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/index", response_class=HTMLResponse)
+def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/prediction", response_class=HTMLResponse)
@@ -136,19 +217,22 @@ async def predict_rent(
 @app.get("/visualization", response_class=HTMLResponse)
 def visualization_page(request: Request):
     # Plotly map
-    fig_map = px.density_mapbox(
+    fig_map = px.scatter_mapbox(
         df,
         lat="latitude",
         lon="longitude",
-        z="rent_density",
-        radius=17,
-        center=dict(lat=19.0760, lon=72.8777),
+        color="density_bin",
+        # color_discrete_map=color_map,
+        hover_name="sector_area",
+        hover_data=["rent", "rooms", "builtup_area"],
         zoom=10,
         mapbox_style="carto-positron",
-        hover_name="sector_area",
-        hover_data=["rent", "rooms", "builtup_area"]
+            color_discrete_map=color_map,
+        category_orders={"density_bin": ["Very_Low", "Low", "Medium", "High", "Very_High"] },
+        title="Rent Density (5-Level Categorized)"
     )
-    fig_map.update_layout(dragmode="zoom")
+    fig_map.update_layout(dragmode="zoom", height=650)
+    
     map_html = fig_map.to_html(full_html=False, config={"scrollZoom": True})
 
     # Initial bivariate image (first feature)
@@ -178,38 +262,117 @@ def recommendation_form(request: Request):
 @app.post("/recommendation", response_class=HTMLResponse)
 def recommendation_page(
     request: Request,
-    village: str = None,
-    budget: float = None,
-    lease: str = None,
-    area: float = None,
-    rooms: int = None,
-    bedrooms: int = None
+
+    # required inputs
+    village: str = Form(...),
+    budget: float = Form(...),
+
+    # lease is checkbox → list
+    lease: list[str] | None = Form(None),
+
+    # optional inputs
+    rooms: str = Form(None),
+    area: str = Form(None),
+    amenities: list[str] | None = Form(None),
+    nearby: list[str] | None = Form(None)
 ):
-    # Filter dataset based on user inputs
-    if village:  # only filter if village input is provided
-        filtered_df = df[df['area'].astype(str).str.contains(village, case=False, na=False)]
-    else:
-        filtered_df = df.copy()
-        
-    if budget:
-        filtered_df = filtered_df[filtered_df['rent'] <= budget]
-    if area:
-        filtered_df = filtered_df[filtered_df['builtup_area'] >= area]
-    if rooms:
-        filtered_df = filtered_df[filtered_df['rooms'] >= rooms]
-    if bedrooms and 'bedrooms' in df.columns:
-        filtered_df = filtered_df[filtered_df['bedrooms'] >= bedrooms]
-    if lease:
-        # assuming you have a column 'lease_type' in lowercase
-        filtered_df = filtered_df[filtered_df['lease_type'].str.lower() == lease.lower()]
 
-    # Get top 5 recommendations by rent (closest to budget or cheapest)
-    recommendation = filtered_df.nsmallest(5, 'rent')
+    # ---------- SAFE CAST ----------
+    def safe_float(x):
+        try:
+            return float(x)
+        except:
+            return None
 
-    # Plotly map with markers
-    if not recommendation.empty:
+    def safe_int(x):
+        try:
+            return int(x)
+        except:
+            return None
+
+    rooms = safe_int(rooms)
+    area = safe_float(area)
+
+    # ---------- GEOCODE VILLAGE INTO LAT/LON ----------
+    # geo = GEOCODER.geocode(village)
+
+    user_lat, user_lon = get_coordinates(village=village)
+
+    # if not geo:
+    #     user_lat, user_lon = None, None
+    # else:
+    #     user_lat = geo[0]["geometry"]["lat"]
+    #     user_lon = geo[0]["geometry"]["lng"]
+
+    # ---------- USER FEATURE VECTOR ----------
+    user_vec = {
+        "budget": budget,
+        "rooms": rooms or 0,
+        "area": area or 0,
+        "lease_family": 1 if lease and "Family" in lease else 0,
+        "lease_bachelors": 1 if lease and "Bachelors" in lease else 0,
+        "lease_company": 1 if lease and "Company" in lease else 0,
+    }
+
+    # Amenities
+    amen_list = [
+        "gas_pipeline","gated_community","swimming_pool","garden",
+        "sports","gym","intercom","power_backup"
+    ]
+    for a in amen_list:
+        user_vec["amen_" + a] = 1 if (amenities and a in amenities) else 0
+
+    # Nearby facilities
+    near_list = [
+        "school","bus_stop","railway_station","mall","metro_station",
+        "airport","hospital","restaurant"
+    ]
+    for n in near_list:
+        user_vec["near_" + n] = 1 if (nearby and n in nearby) else 0
+
+    user_vector = np.array(list(user_vec.values())).reshape(1, -1)
+
+    # ---------- BUILD PROPERTY VECTORS FROM DATA ----------
+    property_vectors = []
+    df_indices = []
+
+    for idx, row in df.iterrows():
+        vec = [
+            row.get("rent", 0),
+            row.get("rooms", 0),
+            row.get("builtup_area", 0),
+            1 if row.get("lease_type") == "Family" else 0,
+            1 if row.get("lease_type") == "Bachelors" else 0,
+            1 if row.get("lease_type") == "Company" else 0,
+        ]
+
+        # Amenity columns exist?
+        for a in amen_list:
+            vec.append(1 if row.get(a) == 1 else 0)
+
+        for n in near_list:
+            vec.append(1 if row.get(n) == 1 else 0)
+
+        property_vectors.append(vec)
+        df_indices.append(idx)
+
+    property_vectors = np.array(property_vectors)
+
+    # ---------- COSINE SIMILARITY ----------
+    sims = cosine_similarity(user_vector, property_vectors)[0]
+
+    df["similarity"] = sims
+
+    # ---------- FILTER BY REQUIRED ----------
+    recs = df[
+    (df['latitude'].between(user_lat - 0.05, user_lat + 0.05)) &
+    (df['longitude'].between(user_lon - 0.05, user_lon + 0.05)) &
+    (df['rent'] <= budget+ 0.15*budget)
+    ].sort_values("similarity", ascending=False).head(10)
+
+    if not recs.empty:
         fig = px.scatter_mapbox(
-            recommendation,
+            recs,
             lat="latitude",
             lon="longitude",
             hover_name="sector_area",
@@ -223,8 +386,12 @@ def recommendation_page(
     else:
         map_html = "<p>No recommendations found for your criteria.</p>"
 
-    return templates.TemplateResponse("recommendation_results.html", {
-        "request": request,
-        "recommendation": recommendation.to_dict(orient="records"),
-        "map_plot": map_html
-    })
+    # ---------- RENDER RESULT ----------
+    return templates.TemplateResponse(
+        "recommendation_results.html",
+        {
+            "request": request,
+            "recommendation": recs.to_dict(orient="records"),
+            "map_plot": map_html
+        }
+    )

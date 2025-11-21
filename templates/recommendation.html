@@ -4,76 +4,160 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>House Rent Recommendation</title>
+
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #0d1117;
-            color: #f0f6fc;
-            margin: 0;
-            padding: 0;
-        }
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 20px;
 
-        .container {
-            max-width: 600px;
-            margin: 60px auto;
-            background: #161b22;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 0 15px rgba(255,255,255,0.05);
-        }
+      /* Dark Theme */
+      background-color: #121212;
+      color: #e0e0e0;
 
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #58a6ff;
-        }
+      /* Background Image */
+      background-image: url('/static/images/mumbai_skyline.jpg'); 
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
 
-        label {
-            font-weight: 500;
-            margin-top: 15px;
-            display: block;
-        }
+    /* Dark overlay for opacity */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.0);
+        z-index: -1;
+    }
 
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border: none;
-            border-radius: 8px;
-            background: #21262d;
-            color: #f0f6fc;
-        }
+    /* NAVIGATION BAR */
+    nav {
+        background-color: rgba(0,0,0,0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 15px 0;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 100;
+    }
 
-        input:focus, select:focus {
-            outline: 2px solid #58a6ff;
-        }
+    nav a {
+        color: #f5f5f5;
+        text-decoration: none;
+        margin: 0 20px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
 
-        .btn {
-            background: #238636;
-            border: none;
-            width: 100%;
-            padding: 12px;
-            color: white;
-            font-weight: bold;
-            border-radius: 10px;
-            margin-top: 25px;
-            cursor: pointer;
-        }
+    nav a:hover {
+        color: #00ffcc;
+    }
 
-        .btn:hover {
-            background: #2ea043;
-        }
+    /* MAIN CONTAINER (Glass-like same as prediction) */
+    .container {
+        max-width: 800px;
+        margin: 80px auto;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 35px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.7);
+    }
 
-        .optional {
-            font-size: 0.9em;
-            color: #8b949e;
-        }
+    h2 {
+        text-align: center;
+        margin-bottom: 25px;
+        color: #90caf9;
+        font-size: 1.8rem;
+    }
+
+    label {
+        font-weight: 500;
+        margin-top: 15px;
+        display: block;
+        color: #ddd;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #555;
+        border-radius: 8px;
+        background: #1e1e1e;
+        color: #f0f6fc;
+    }
+
+    input:focus, select:focus {
+        outline: 2px solid #58a6ff;
+    }
+
+    .checkbox-group {
+        margin-top: 10px;
+        background: #1e1e1e;
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 1px solid #444;
+    }
+
+    .checkbox-group label {
+        display: flex;
+        align-items: center;
+        margin-top: 8px;
+        font-weight: normal;
+        color: #ccc;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: auto;
+        margin-right: 10px;
+    }
+
+    .btn {
+        background: #1e88e5;
+        border: none;
+        width: 100%;
+        padding: 14px;
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 10px;
+        margin-top: 30px;
+        cursor: pointer;
+    }
+
+    .btn:hover {
+        background: #1565c0;
+    }
+
+    .optional {
+        font-size: 0.9em;
+        color: #8b949e;
+    }
     </style>
 </head>
 <body>
+
+    <!-- NAVBAR -->
+    <nav>
+        <a href="index">Home</a>
+        <a href="prediction">Prediction</a>
+        <a href="visualization">Visualization</a>
+    </nav>
+
+
+    <!-- MAIN FORM -->
     <div class="container">
         <h2>Find Recommended Rentals</h2>
+
         <form action="/recommendation" method="POST">
+
             <label for="village">Village / Town (MMR)</label>
             <input type="text" id="village" name="village" placeholder="e.g., Andheri West" required>
 
@@ -93,11 +177,36 @@
             <label for="rooms">Rooms <span class="optional">(Optional)</span></label>
             <input type="number" id="rooms" name="rooms" placeholder="e.g., 2">
 
-            <label for="bedrooms">Bedrooms <span class="optional">(Optional)</span></label>
-            <input type="number" id="bedrooms" name="bedrooms" placeholder="e.g., 2">
+            <!-- Amenities -->
+            <label>Amenities <span class="optional">(Optional)</span></label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" name="amenities" value="gas_pipeline"> Gas Pipeline</label>
+                <label><input type="checkbox" name="amenities" value="gym"> Gym</label>
+                <label><input type="checkbox" name="amenities" value="sports"> Sports</label>
+                <label><input type="checkbox" name="amenities" value="gated_community"> Gated Community</label>
+                <label><input type="checkbox" name="amenities" value="intercom"> Intercom</label>
+                <label><input type="checkbox" name="amenities" value="power_backup"> Power Backup</label>
+                <label><input type="checkbox" name="amenities" value="garden"> Garden</label>
+                <label><input type="checkbox" name="amenities" value="restaurant"> Security</label>
+            </div>
+
+            <!-- Nearby -->
+            <label>Nearby Places <span class="optional">(Optional)</span></label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" name="nearby" value="school"> School/University</label>
+                <label><input type="checkbox" name="amenities" value="airport"> Airport </label>
+                <label><input type="checkbox" name="amenities" value="hospital"> Hospital</label>
+                <label><input type="checkbox" name="nearby" value="metro"> Metro Station</label>
+                <label><input type="checkbox" name="nearby" value="railway_station"> Railway Station</label>
+                <label><input type="checkbox" name="nearby" value="mall"> Shopping Mall</label>
+                <label><input type="checkbox" name="nearby" value="bus_stop"> Bus Stand</label>
+                <label><input type="checkbox" name="nearby" value="Restaurant"> Restaurants</label>
+            </div>
 
             <button type="submit" class="btn">Recommend</button>
+
         </form>
     </div>
+
 </body>
 </html>
