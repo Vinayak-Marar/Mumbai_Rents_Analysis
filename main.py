@@ -152,6 +152,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/index", response_class=HTMLResponse)
+def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
 
 @app.get("/prediction", response_class=HTMLResponse)
 def predict_page(request: Request):
