@@ -8,8 +8,9 @@ python-multipart
 uvicorn
 plotly
 joblib
-yaml
+PyYAML
 openpyxl
 httpx
 geopy
+opencage
 -e .
