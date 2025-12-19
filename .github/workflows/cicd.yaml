@@ -26,5 +26,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Pull DVC data
+        run: dvc pull
+
       - name: Run DVC pipeline
         run: dvc repro
