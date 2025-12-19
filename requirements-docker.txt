@@ -1,0 +1,18 @@
+numpy
+pandas
+scikit-learn
+mlflow
+dvc
+fastapi
+python-multipart
+uvicorn
+plotly
+# joblib
+# yaml
+openpyxl
+httpx
+geopy
+opencage
+
+joblib==1.5.2
+PyYAML==6.0

@@ -95,7 +95,8 @@ def normalize_lease_type(x):
 
 
 load_dotenv()
-GEOKEY = os.getenv("opencage")
+# GEOKEY = os.getenv("opencage")
+GEOKEY = os.environ.get("opencage")
 geocoder = OpenCageGeocode(GEOKEY)
 
 
