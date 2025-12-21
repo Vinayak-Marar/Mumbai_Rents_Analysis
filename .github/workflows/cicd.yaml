@@ -36,5 +36,8 @@ jobs:
       - name: Pull DVC data from S3
         run: dvc pull -r storage
 
-      - name: Run DVC pipeline
-        run: dvc repro
+      # - name: Run DVC pipeline
+      #   run: dvc repro
+
+      - name: Build Docker image
+        run: docker build -t my-app:latest .
