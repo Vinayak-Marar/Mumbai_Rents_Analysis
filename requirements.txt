@@ -13,4 +13,5 @@ openpyxl
 httpx
 geopy
 opencage
+dvc[s3]
 -e .
