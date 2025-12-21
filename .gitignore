@@ -4,11 +4,13 @@ __pycache__/
 *$py.class
 
 data/
+!data/**/*.dvc
 mlruns/
 experiment/full_df.csv
 experiment/final_df.csv
 src.egg-info
 models/
+!models/**/*.dvc
 model.pkl
 final_df.csv
 full_df.csv

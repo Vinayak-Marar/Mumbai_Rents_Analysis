@@ -1,2 +1,9 @@
 [core]
     autostage = true
+    remote = storage
+['remote "mygdrive"']
+    url = gdrive://1eWKR11fXR_b0IJ3i9ftLfkpOGgMw9y4C
+['remote "storage"']
+    url = s3://mumbai-rent-analysis
+['remote "myremote"']
+    url = s3://my-dvc-bucket
