@@ -11,9 +11,6 @@ experiment/final_df.csv
 src.egg-info
 models/
 !models/**/*.dvc
-model.pkl
-final_df.csv
-full_df.csv
 logs/
 
 

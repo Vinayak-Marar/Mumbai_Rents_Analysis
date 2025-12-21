@@ -82,12 +82,12 @@ stages:
     outs:
     - path: data/transformed/X_test.csv
       hash: md5
-      md5: e97cb022001df7b41978ff56b6c586d3
-      size: 687647
+      md5: 19c8ff858609ee9596949446b9009be9
+      size: 725333
     - path: data/transformed/X_train.csv
       hash: md5
-      md5: c4581d48dcdc069f706536b71878e481
-      size: 2749493
+      md5: 6a1bd4189140f2db506fb1b3b958646b
+      size: 2899614
     - path: data/transformed/y_test.csv
       hash: md5
       md5: 966792d94a266615cd09483303741daa
@@ -96,13 +96,17 @@ stages:
       hash: md5
       md5: a1f5ee20c68ff1e977814c7812ec156a
       size: 181918
+    - path: models/transformer.pkl
+      hash: md5
+      md5: 519e82e823e4e88db28f2f2a17242834
+      size: 4455
   model_training:
     cmd: python src/model/model_trainer.py
     deps:
     - path: data/transformed/X_train.csv
       hash: md5
-      md5: c4581d48dcdc069f706536b71878e481
-      size: 2749493
+      md5: 6a1bd4189140f2db506fb1b3b958646b
+      size: 2899614
     - path: data/transformed/y_train.csv
       hash: md5
       md5: a1f5ee20c68ff1e977814c7812ec156a
@@ -114,23 +118,23 @@ stages:
     outs:
     - path: models/model.pkl
       hash: md5
-      md5: eef5255620b11ca39ed8da24288ce65e
-      size: 374848097
+      md5: b6b67df1f76a69b70bba7cb2c47cb24d
+      size: 373868897
   model_evaluation:
     cmd: python src/model/model_evaluation.py
     deps:
     - path: data/transformed/X_test.csv
       hash: md5
-      md5: e97cb022001df7b41978ff56b6c586d3
-      size: 687647
+      md5: 19c8ff858609ee9596949446b9009be9
+      size: 725333
     - path: data/transformed/y_test.csv
       hash: md5
       md5: 966792d94a266615cd09483303741daa
       size: 45519
     - path: models/model.pkl
       hash: md5
-      md5: eef5255620b11ca39ed8da24288ce65e
-      size: 374848097
+      md5: b6b67df1f76a69b70bba7cb2c47cb24d
+      size: 373868897
     - path: src/model/model_evaluation.py
       hash: md5
       md5: f52f110e6feaf56b64e9d61bea77142c
