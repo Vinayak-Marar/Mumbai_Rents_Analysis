@@ -38,6 +38,7 @@ stages:
       - data/transformed/X_test.csv
       - data/transformed/y_train.csv
       - data/transformed/y_test.csv
+      - models/transformer.pkl
 
   model_training:
     cmd: python src/model/model_trainer.py

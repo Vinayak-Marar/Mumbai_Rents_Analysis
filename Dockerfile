@@ -1,5 +1,5 @@
 # Base Python image
-FROM python:3.11-slim
+FROM python:3.11-alpine
 
 # Set working directory inside container
 WORKDIR /app
@@ -13,7 +13,7 @@ COPY templates/ /app/templates/
 COPY static/ /app/static/
 
 # Install dependencies
-COPY templates/requirements.txt /app/requirements.txt
+COPY requirements-docker.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose FastAPI port
