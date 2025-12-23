@@ -72,7 +72,7 @@ def main():
         with mlflow.start_run() as run:
 
             # Train model
-            reg = train_model(X_train, y_train)
+            reg = train_model(X_train, y_train.ravel())
 
             # Log model parameters to MLflow
             if hasattr(reg, 'get_params'):

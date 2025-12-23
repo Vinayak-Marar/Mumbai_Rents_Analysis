@@ -7,6 +7,13 @@ import os
 
 from src.logger.logger import logging
 from src.utils.utils import get_lat_long
+from src.connections.s3_connections import s3_operations
+
+from dotenv import load_dotenv
+from pathlib import Path
+
+env_path = Path(__file__).resolve().parents[2] / ".env"
+load_dotenv(env_path)
 
 
 def load_params(params_path: str) -> dict:
@@ -85,8 +92,18 @@ def save_data(df: pd.DataFrame, file_path: str) -> None:
 
 
 if __name__ == '__main__':
+
+    AWS_ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY")
+    AWS_SECRET_KEY = os.environ.get("AWS_SECRET_KEY")
+    BUCKET_NAME = os.environ.get("BUCKET_NAME")
+    FILE_KEY = "raw/lat_long.xlsx"  # Path inside S3 bucket
+
     test_size = 0.2
     data = load_data('./data/processed/data.csv')
+
+    data_ingestion = s3_operations(BUCKET_NAME, AWS_ACCESS_KEY, AWS_SECRET_KEY)
+    df_json = data_ingestion.fetch_file_from_s3(FILE_KEY)
+
     lat_long = pd.read_excel('./data/raw/lat_long.xlsx')
     # test = load_data('./data/processed/test.csv')
     data = creating_new_features(data, lat_long)
@@ -103,5 +120,5 @@ if __name__ == '__main__':
     save_data(y_test, './data/interim/y_test.csv')
 
     logging.info("Feature engineering completed")
-    # save_model(transformer, './models/transformer.pkl')
+
 

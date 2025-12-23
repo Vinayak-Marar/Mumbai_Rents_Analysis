@@ -217,18 +217,12 @@ def extract_info(lst):
 
     return info
 
-
-
-
-
 def normalize_lease_type(x):
     if pd.isna(x):
         return 'Bachelor Company Family'
     # Split by spaces, remove empty, unique, and sort alphabetically
     parts = sorted(set(x.split()))
     return ' '.join(parts)
-
-
 
 def rename_columns(df: pd.DataFrame)  -> pd.DataFrame:
     try:

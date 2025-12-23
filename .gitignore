@@ -4,10 +4,10 @@ __pycache__/
 *$py.class
 
 data/
-!data/**/*.dvc
 mlruns/
 experiment/full_df.csv
 experiment/final_df.csv
+reports/
 src.egg-info
 models/
 !models/**/*.dvc

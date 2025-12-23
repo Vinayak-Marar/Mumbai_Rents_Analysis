@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-
-
 import os
 import yaml
 import json
@@ -12,6 +10,13 @@ import csv
 
 from src.logger.logger import logging
 from src.data_preprocess.data_validation import RawDataValidation
+from src.connections.s3_connections import s3_operations
+
+from dotenv import load_dotenv
+from pathlib import Path
+
+env_path = Path(__file__).resolve().parents[2] / ".env"
+load_dotenv(env_path)
 
 pd.set_option('future.no_silent_downcasting', True)
 
@@ -78,17 +83,21 @@ def save_data(data: pd.DataFrame, data_path: str) -> None:
 
 def main():
     try:
-        logging.info("Data Ingestion Started")
-        # params = load_params(params_path='params.yaml')
-        # test_size = params['data_ingestion']['test_size']
-        test_size = 0.2
+        AWS_ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY")
+        AWS_SECRET_KEY = os.environ.get("AWS_SECRET_KEY")
+        BUCKET_NAME = os.environ.get("BUCKET_NAME")
+        FILE_KEY = "raw/raw_data.json"  # Path inside S3 bucket
 
-        root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
-        print(f"root_dir: {root_dir}")
-        path = os.path.join(root_dir, "data/raw", "raw_data.json")
+
+        logging.info("Data Ingestion Started")
+
+        # root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+        # path = os.path.join(root_dir, "data/raw", "raw_data.json")
         
         
-        df_json = load_data(data_path=path)
+        data_ingestion = s3_operations(BUCKET_NAME, AWS_ACCESS_KEY, AWS_SECRET_KEY)
+        df_json = data_ingestion.fetch_file_from_s3(FILE_KEY)
+
         converted_data = convert_to_csv(df_json)
 
         validator = RawDataValidation(converted_data)
