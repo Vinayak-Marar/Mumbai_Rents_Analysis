@@ -102,9 +102,8 @@ if __name__ == '__main__':
     data = load_data('./data/processed/data.csv')
 
     data_ingestion = s3_operations(BUCKET_NAME, AWS_ACCESS_KEY, AWS_SECRET_KEY)
-    df_json = data_ingestion.fetch_file_from_s3(FILE_KEY)
 
-    lat_long = pd.read_excel('./data/raw/lat_long.xlsx')
+    lat_long = data_ingestion.fetch_file_from_s3(FILE_KEY)
     # test = load_data('./data/processed/test.csv')
     data = creating_new_features(data, lat_long)
 
