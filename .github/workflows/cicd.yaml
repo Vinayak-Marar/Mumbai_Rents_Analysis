@@ -1,47 +1,80 @@
-name: CI Pipeline
+# name: CI-CD Pipeline
 
-on:
-  push:
-    branches: [ main ]
+# on:
+#   push:
+#     branches: [ main ]
 
-jobs:
-  test-dvc-pipeline:
-    runs-on: ubuntu-latest
-    env:      
-      BUCKET_NAME: ${{ secrets.BUCKET_NAME }} 
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+# jobs:
+#   Continuous-Integration:
+#     runs-on: ubuntu-latest
+#     env:
+#       BUCKET_NAME: ${{ secrets.BUCKET_NAME }} 
+#       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
+#       - name: Setup Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: "3.10"
 
-      - name: Cache pip
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+#       - name: Install dependencies
+#         run: pip install -r requirements.txt
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt 
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+#       - name: Run dvc pipeline
+#         run: dvc repro
 
-      # - name: Pull DVC data from S3
-      #   run: dvc pull -r storage
+#       - name: Login to Amazon ECR
+#         id: login-ecr
+#         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Run DVC pipeline
-        run: dvc repro
+#       - name: Build, tag, and push Docker image
+#         env:
+#           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#           ECR_REPOSITORY: ${{ secrets.ECR_REPO }}
+#           IMAGE_TAG: latest
+#         run: |
+#           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+#           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Build Docker image
-        run: docker build -t my-app:latest .
+
+#   Continuous-Deployment:
+#     needs: Continuous-Integration
+#     runs-on: self-hosted
+
+#     steps:
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ secrets.AWS_REGION }}
+
+#       - name: Login to Amazon ECR
+#         id: login-ecr
+#         uses: aws-actions/amazon-ecr-login@v1
+
+#       - name: Stop and remove old container
+#         run: |
+#           docker stop app || true
+#           docker rm app || true
+
+#       - name: Run new container
+#         run: |
+#           docker run -d \
+#             -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+#             -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+#             -e AWS_DEFAULT_REGION="${{ secrets.AWS_REGION }}" \
+#             -e OPENCAGE_API_KEY="${{ secrets.OPENCAGE_API_KEY }}" \
+#             -p 8000:8000 \
+#             "${{ steps.login-ecr.outputs.registry }}"/"${{ secrets.ECR_REPO }}":latest
