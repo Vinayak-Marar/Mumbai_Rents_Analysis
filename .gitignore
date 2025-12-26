@@ -7,10 +7,9 @@ data/
 mlruns/
 experiment/full_df.csv
 experiment/final_df.csv
+experiment/mlruns
 reports/
 src.egg-info
-models/
-!models/**/*.dvc
 logs/
 
 

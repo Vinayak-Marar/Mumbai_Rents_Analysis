@@ -29,7 +29,7 @@ def transform_data(X_train: pd.DataFrame, X_test: pd.DataFrame) -> pd.DataFrame:
     try:
         logging.info("Transforming the data")
 
-        final_features = ["builtup_area","rooms","furnish","bathrooms", "balcony",\
+        final_features = ["builtup_area","bedrooms","furnish","bathrooms", "balcony",\
                           "facing","gas_pipline","gated_community","swimming_pool","gym","intercom",\
                           "power_backup","garden","sports","current_floor","total_floor","lease_type",\
                           "covered_parking","open_parking","school/university","airport","bus_stop",\

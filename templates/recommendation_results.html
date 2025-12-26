@@ -167,7 +167,7 @@
                     <tr>
                         <th>Location</th>
                         <th>Rent (₹)</th>
-                        <th>Rooms</th>
+                        <th>Bedrooms</th>
                         <th>Built-up Area (sqft)</th>
                         <th>Lease Type</th>
                         <th>Link</th>
@@ -178,7 +178,7 @@
                         <tr>
                             <td>{{ rec.get("sector_area") or rec.get("area") or "N/A" }}</td>
                             <td>{{ rec.get("rent") | int if rec.get("rent") is not none else "N/A" }}</td>
-                            <td>{{ rec.get("rooms") or "N/A" }}</td>
+                            <td>{{ rec.get("bedrooms") or "N/A" }}</td>
                             <td>{{ rec.get("builtup_area") or "N/A" }}</td>
                             <td>
                                 {% if rec.get("lease_type") %}

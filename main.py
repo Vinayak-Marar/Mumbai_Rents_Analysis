@@ -21,7 +21,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 # CONSTANTS
 # ---------------------------------------------
 FEATURES = [
-    "builtup_area", "rooms", "furnish", "bathrooms", "balcony",
+    "builtup_area", "bedrooms", "furnish", "bathrooms", "balcony",
     "facing", "gas_pipline", "gated_community", "swimming_pool",
     "gym", "intercom", "power_backup", "garden", "sports",
     "current_floor", "total_floor", "lease_type",
@@ -43,7 +43,7 @@ NEARBY = [
 
 BIVAR_FEATURES = [
     "builtup_area", "bathrooms", "furnish", "facing",
-    "rooms", "balcony", "current_floor"
+    "bedrooms", "balcony", "current_floor"
 ]
 
 
@@ -166,7 +166,7 @@ def predict_page(request: Request):
 @app.post("/prediction", response_class=HTMLResponse)
 async def predict_rent(
     request: Request,
-    rooms: int = Form(...),
+    bedrooms: int = Form(...),
     builtup_area: int = Form(...),
     bathroom: int = Form(...),
     balconies: int = Form(0),
@@ -186,7 +186,7 @@ async def predict_rent(
     if lat is None:
         return JSONResponse({"error": f"Coordinates not found for '{village}'"})
 
-    basic_inputs = [builtup_area, rooms, furnish_type, bathroom, balconies, facing]
+    basic_inputs = [builtup_area, bedrooms, furnish_type, bathroom, balconies, facing]
     amenities_list = [1 if a.lower() in amenities else 0 for a in AMENITIES]
 
     lease_type = normalize_lease_type(lease)
@@ -221,7 +221,7 @@ def visualization_page(request: Request):
         df, lat="latitude", lon="longitude",
         color="density_bin",
         hover_name="sector_area",
-        hover_data=["rent", "rooms", "builtup_area"],
+        hover_data=["rent", "bedrooms", "builtup_area"],
         zoom=10,
         mapbox_style="carto-positron",
         color_discrete_map=COLOR_MAP,
@@ -264,7 +264,7 @@ def recommendation_page(
     village: str = Form(...),
     budget: float = Form(...),
     lease: list[str] = Form(None),
-    rooms: str = Form(None),
+    bedrooms: str = Form(None),
     area: str = Form(None),
     amenities: list[str] = Form(None),
     nearby: list[str] = Form(None)
@@ -278,14 +278,14 @@ def recommendation_page(
         try: return int(x)
         except: return None
 
-    rooms = safe_int(rooms)
+    bedrooms = safe_int(bedrooms)
     area = safe_float(area)
 
     user_lat, user_lon = get_coordinates(village)
 
     user_vec = {
         "budget": budget,
-        "rooms": rooms or 0,
+        "bedrooms": bedrooms or 0,
         "area": area or 0,
         "lease_family": 1 if lease and "Family" in lease else 0,
         "lease_bachelors": 1 if lease and "Bachelors" in lease else 0,
@@ -315,7 +315,7 @@ def recommendation_page(
     for _, row in df.iterrows():
         vec = [
             row.get("rent", 0),
-            row.get("rooms", 0),
+            row.get("bedrooms", 0),
             row.get("builtup_area", 0),
             1 if row.get("lease_type") == "Family" else 0,
             1 if row.get("lease_type") == "Bachelors" else 0,
@@ -346,7 +346,7 @@ def recommendation_page(
             recs,
             lat="latitude", lon="longitude",
             hover_name="sector_area",
-            hover_data=["rent", "rooms", "builtup_area"],
+            hover_data=["rent", "bedrooms", "builtup_area"],
             zoom=12, height=500,
             mapbox_style="carto-positron"
         )

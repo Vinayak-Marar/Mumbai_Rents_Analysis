@@ -248,10 +248,26 @@ def rename_columns(df: pd.DataFrame)  -> pd.DataFrame:
         logging.error('Unexpected error occurred while renaming the data: %s', e)
         raise
 
+def extract_bedrooms(text):
+    if not isinstance(text, str):
+        return None
+
+    text = text.upper()
+
+    if 'RK' in text:
+        return 0.0
+
+    match = re.search(r'(\d+(?:\.5)?)\s*BHK', text)
+    if match:
+        return float(match.group(1))
+
+    return None
+
 
 def create_new_df(df: pd.DataFrame) -> pd.DataFrame :
     try :
-        rooms = [float(df.rooms.iloc[i].split()[0]) for i in range(len(df))]
+        bedrooms = df['rooms'].apply(extract_bedrooms)
+        # rooms = [float(df.rooms.iloc[i].split()[0]) for i in range(len(df))]
         logging.debug("created rooms list")
 
 
@@ -342,7 +358,7 @@ def create_new_df(df: pd.DataFrame) -> pd.DataFrame :
     try:
         all_list = {'link': df.link.to_list(),
         'builtup_area': builtup_area,
-        'rooms': rooms,
+        'bedrooms': bedrooms,
         'furnish': df.furnish.to_list(),
         'address': df.address.to_list(),
         'bathrooms': bathroom,
@@ -373,6 +389,7 @@ def create_new_df(df: pd.DataFrame) -> pd.DataFrame :
         'rent' : rents}
 
         data = pd.DataFrame(all_list)
+        data.dropna(inplace=True)
 
         logging.info("Created Dataframe")
 
